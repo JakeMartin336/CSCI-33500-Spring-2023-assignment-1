@@ -26,20 +26,20 @@ public:
   // Set size to 0.
   Points2D()
   {
-    this->sequence_ = nullptr; //setting the sequence of points to null
-    this->size_ = 0; //setting size for the object to 0
+    sequence_ = nullptr; //setting the sequence of points to null
+    size_ = 0; //setting size for the object to 0
   }
 
   // Copy-constructor.
   Points2D(const Points2D &rhs)
   {
-    this->size_ = rhs.size_; //copying the size of the object passed to the current object
-    this->sequence_ = new std::array<Object, 2>{size_}; //allocating new space and creating a new araray with size of object passed
-    for(size_t i; i < rhs.size_; i++) 
+    sequence_ = new std::array<Object, 2>{rhs.size_}; //allocating new space and creating a new araray with size of object passed
+    size_ = rhs.size_; //copying the size of the object passed to the current object
+    for(size_t i; i < rhs.size_; i++) //copying the points from the object passed into the new object's array
     {
-      this->sequence_[i][0] = rhs[i][0];
-      this->sequence_[i][1] = rhs[i][1];
-    }  
+      sequence_[i][0] = rhs[i][0];
+      sequence_[i][1] = rhs[i][1];
+    }    
   }
 
   // Copy-assignment. If you have already written
@@ -58,7 +58,7 @@ public:
   }
 
   // Move-constructor.
-  Points2D(Points2D &&rhs) : sequence_{std::move(rhs.sequence_)}, size_{std::move(rhs.size_)} //setting the object's variables to the object passed variables
+  Points2D(Points2D &&rhs) : sequence_{rhs.sequence_}, size_{rhs.size_} //setting the object's variables to the object passed variables
   {
     rhs.sequence_ = nullptr; //setting the object passed variables to null
     rhs.size_ = 0; //setting the object's passed size to 0
@@ -70,8 +70,8 @@ public:
   {
     if (this != &rhs) //if they are not the same object then swap the two object's variables
     {
-      std::swap(this->sequence_, rhs.sequence_); //swapping the object passed array with the current object 
-      std::swap(this->size_, rhs.size_); //swapping the object passed size with the current object
+      std::swap(sequence_, rhs.sequence_); //swapping the object passed array with the current object 
+      std::swap(size_, rhs.size_); //swapping the object passed size with the current object
     }
     return *this; //returning the object with the new swapped variables
   }
@@ -89,8 +89,10 @@ public:
   // One parameter constructor.
   Points2D(const std::array<Object, 2>& item) 
   {
+    sequence_ = new std::array<Object,2>[1]; //creating new array for the object 
+    sequence_[0][0] = item[0]; //setting the array's 1st point to the object passed 1st point
+    sequence_[0][1] = item[1]; //setting the array's 2nd point to the object passed 2nd point
     size_ = 1; //setting the size to the new object to 1
-    sequence_ = new std::array<Object,2>{item}; //creating new array for the object
   }
 
   size_t size() const 
@@ -115,31 +117,6 @@ public:
   //    result with the remaining part of the larger sequence.
   friend Points2D operator+(const Points2D &c1, const Points2D &c2) 
   {
-    Points2D res;
-    if (c1.size_ > c2.size_) //comparing the sizes, and the biggest size is used for new object
-      res.size_ = c1.size_;
-    else
-      res.size_ = c2.size_;
-    res.sequence_ = new std::array<Object, 2>[res.size_]; //creating a new array
-    for (size_t i = 0; i < res.size_; i++) 
-    {
-        if(i<c1.size_ && i<c2.size_) //if the loop is still in bounds of either array
-        {
-            res.sequence_[i][0] = c1.sequence_[i][0] + c2.sequence_[i][0]; //add the array points
-            res.sequence_[i][1] = c1.sequence_[i][1] + c2.sequence_[i][1];
-        }
-        if(i>=c1.size_) //if the new array is out of bounds of the first array
-        {
-            res.sequence_[i][0] = c2.sequence_[i][0]; //append the remaining points from first array to the new array
-            res.sequence_[i][1] = c2.sequence_[i][1];
-        }
-        if(i>=c2.size_) //if the new array is out of bounds of the second array
-        {
-            res.sequence_[i][0] = c1.sequence_[i][0]; //append the remaining points from second array to the new array
-            res.sequence_[i][1] = c1.sequence_[i][1];
-        }
-    }
-    return res;
   }
 
   // Overloading the << operator.
@@ -168,27 +145,6 @@ public:
   // Read a chain from an input stream (e.g., standard input).
   friend std::istream &operator>>(std::istream &in, Points2D &some_points) 
   {
-    std::string input_line;
-    std::getline(in, input_line); //reading from input and storing it in a string
-    std::stringstream input_stream(input_line); //passing the string to read a number at a time
-    if (input_line.empty()) //if string if empty then return
-      return in;
-    int size_of_sequence;
-    input_stream >> size_of_sequence; //getting the size of the new array from the string 
-    
-    some_points.size_ = size_of_sequence; //declaring the size of the new array from the string
-    some_points.sequence_ = new std::array<Object, 2>{size_of_sequence}; //creating a new array of size that was given from the string
-
-    Object token; //creating abject to store the points that were passed through the string
-    for (size_t i = 0; i < some_points.size_; ++i)  //looping through the string for the remaining points that was given
-    {
-      input_stream >> token; //getting the first part of the point that was passed
-      some_points.sequence_[i][0] = token; //storing the first part of the point in the array
-      input_stream >> token; //getting the second part of the point that was passed
-      some_points.sequence_[i][1] = token; //storing the second part of the point in the array
-    }
-
-    return in;
   }
 
 private:
